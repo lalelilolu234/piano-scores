@@ -1,0 +1,268 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ravel – Une barque sur l'océan</title>
+<style>
+:root{--ink:#1b2430;--bg:#eef1f4;--panel:#fff;--R:#13945a;--L:#2367d1;--O:#9a4fd6;--line:#e5473c;--mute:#c9ced6}
+*{box-sizing:border-box}html,body{margin:0;background:var(--bg);color:var(--ink);font:15px/1.4 -apple-system,"Segoe UI",system-ui,sans-serif}
+#top{position:sticky;top:0;z-index:9;background:var(--panel);box-shadow:0 2px 10px #0002}
+#bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;padding:8px 12px}
+#ttl{font-weight:700;font-size:15px;margin-right:6px}
+button{font:inherit;border:1px solid #c8ced6;background:#fff;border-radius:999px;padding:6px 14px;cursor:pointer;color:var(--ink)}
+button.p{background:var(--ink);color:#fff;border-color:var(--ink);min-width:92px}
+.grp{display:flex;gap:6px;align-items:center}
+.tog{display:flex;align-items:center;gap:6px}.tog i{width:10px;height:10px;border-radius:50%;display:inline-block}
+.tog.off{opacity:.4;text-decoration:line-through}
+.sep{width:1px;height:24px;background:#dde1e6}
+label{display:flex;align-items:center;gap:6px;font-size:13px}input[type=range]{width:120px}
+#tabs{display:flex;gap:6px;padding:0 12px 8px;flex-wrap:wrap}#tabs button{border-radius:8px;padding:4px 12px;font-size:13px}#tabs button.on{background:#e8eef8;border-color:var(--L);font-weight:700}
+#kb{position:relative;height:96px;width:100%;touch-action:none;overflow:hidden;background:#222}
+.k{position:absolute;top:0;border-radius:0 0 3px 3px}.w{background:#fff;height:96px;border:1px solid #bbb}.b{background:#222;height:58px;z-index:2}
+.k.L{background:var(--L)}.k.R{background:var(--R)}.k.O{background:var(--O)}
+#info{display:flex;flex-wrap:wrap;gap:14px;align-items:baseline;padding:6px 12px 8px}
+#keyName{font-weight:700}#keyName.flash{background:#ffd34d;padding:0 8px;border-radius:6px}
+#ch{font-size:22px;font-weight:700}#tones{font-size:16px;color:#555}
+#score{padding:12px 8px 45vh}
+.sysw{margin:0 auto 16px}.sys{position:relative;background:var(--panel);margin:0;border-radius:10px;overflow:hidden;cursor:pointer;box-shadow:0 1px 3px #0001}
+.sys svg{display:block}
+.band{position:absolute;top:0;bottom:0;left:0;width:0;background:#ffe14d40;pointer-events:none;visibility:hidden}.ln{position:absolute;top:0;bottom:0;left:0;width:4px;margin-left:-2px;box-shadow:0 0 6px var(--line);background:var(--line);pointer-events:none;will-change:transform;visibility:hidden}
+.shade{position:absolute;left:0;right:0;background:#eef1f4cc;pointer-events:none;display:none}
+.keych{position:absolute;top:2px;background:#ffd34d;font-weight:700;padding:1px 8px;border-radius:5px;font-size:13px;z-index:3;pointer-events:none}
+.nr{position:absolute;font-size:11px;color:#888;pointer-events:none}
+.unclear{background:#fde8e6;color:#a11;font-size:11px;position:absolute;padding:1px 5px;border-radius:4px;pointer-events:none}
+.ins{position:absolute;font-size:11px;font-style:italic;color:var(--O);pointer-events:none;white-space:nowrap}
+
+.k.S{background:#e8590c}
+#selinfo{display:none;flex-wrap:wrap;gap:12px;align-items:center;padding:6px 12px 9px;border-top:1px solid #e4e7ec;background:#fff7f2}
+#selinfo.on{display:flex}
+#selinfo b{font-size:20px}#selinfo .bt{color:#555;font-size:14px}#selinfo .bt em{font-style:normal;font-weight:700;color:#c2410c}
+button.selon{background:#e8590c;color:#fff;border-color:#e8590c}
+body.sel .sys{cursor:crosshair;touch-action:none}
+.selbox{position:absolute;border:2px dashed #e8590c;background:#e8590c18;pointer-events:none;z-index:4}
+.sm{position:absolute;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;border:3px solid #e8590c;pointer-events:none;z-index:4}
+select{font:inherit;font-size:13px;border:1px solid #c8ced6;border-radius:8px;padding:4px 6px;background:#fff}
+#loading{font-size:12px;color:#888}
+.soon{padding:60px 20px;text-align:center;color:#777}
+</style><link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-title" content="Piano Scores"><meta name="robots" content="noindex"><script>if("serviceWorker"in navigator)navigator.serviceWorker.register("sw.js")</script></head><body>
+<div id="top">
+<div id="bar"><a href="index.html" style="text-decoration:none;color:inherit;font-weight:600;margin-right:6px;white-space:nowrap">‹ Pieces</a><span id="ttl">Ravel – Une barque sur l'océan</span>
+<button class="p" id="play">▶ Play</button><button id="home">⏮ Start</button>
+<span class="sep"></span>
+<span class="grp" id="parts"></span>
+<span class="sep"></span>
+<label>Speed <input id="sp" type="range" min="25" max="200" step="5" value="100"> <span id="spv">100%</span></label>
+<label>Sound <select id="out"><option value="">Piano</option></select></label>
+<button id="selbtn">✋ Select notes</button>
+<span id="loading"></span>
+<label>Size <input id="zm" type="range" min="40" max="120" value="65"><script>/*phoneZoom*/if(innerWidth<700)document.getElementById("zm").value=40</script> <span id="zmv">65%</span></label>
+</div>
+<div id="tabs"></div>
+<div id="kb"></div>
+<div id="selinfo"><span>Selected:</span><b id="sch">–</b><span class="bt" id="sbt"></span><span class="bt" id="snotes"></span><button id="shear">▶ Hear again</button><button id="sclr">Clear</button></div>
+<div id="info"><span id="keyName"></span><span id="ch">–</span><span id="tones"></span></div>
+</div>
+<div id="score"></div>
+<script src="vexflow.js"></script>
+<script src="sound.js"></script><script src="ravel-une-barque-1.js"></script>
+<script>const DATA={title:"Ravel – Une barque sur l'océan",movements:window.MV};
+const VF=Vex.Flow;
+const KEY={0:'C',1:'G',2:'D',3:'A',4:'E',5:'B',6:'F#',7:'C#','-1':'F','-2':'Bb','-3':'Eb','-4':'Ab','-5':'Db','-6':'Gb','-7':'Cb'};
+const COL={a:'R',b:'L',c:'O',d:'O'};const CSS={R:'#13945a',L:'#2367d1',O:'#9a4fd6'};
+const NAME={R:'Right hand',L:'Left hand',O:'Orchestra'};
+const on={R:true,L:true,O:true};
+let A=null,mvI=0;
+const $=id=>document.getElementById(id);
+const pretty=s=>s.replace(/([A-G])b/g,'$1♭').replace(/([A-G])#/g,'$1♯');
+// ---------- keyboard ----------
+const kb=$('kb');const keys={};let LO=21,HI=108;
+const isB=m=>[1,3,6,8,10].includes(m%12);
+function range(){LO=108;HI=21;for(const b of A.bars)for(const k in b.parts)for(const v of b.parts[k])for(const e of v)for(const n of e.notes){LO=Math.min(LO,n.m);HI=Math.max(HI,n.m)}
+ if(LO>HI){LO=36;HI=96}LO=Math.max(21,LO-1);HI=Math.min(108,HI+1);if(isB(LO))LO--;if(isB(HI))HI++}
+function buildKb(){kb.innerHTML='';for(const m in keys)delete keys[m];const W=kb.clientWidth;let nW=0;for(let m=LO;m<=HI;m++)if(!isB(m))nW++;const kw=W/nW;let i=0;
+ for(let m=LO;m<=HI;m++){const b=isB(m);const e=document.createElement('div');e.className='k '+(b?'b':'w');
+  if(b){e.style.left=(i*kw-kw*.3)+'px';e.style.width=kw*.6+'px'}else{e.style.left=i*kw+'px';e.style.width=kw+'px';i++}
+  e.onpointerdown=ev=>{ev.preventDefault();tapKey(m)};kb.appendChild(e);keys[m]=e}}
+const lit={};
+function setKey(m,c,v){if(!keys[m])return;lit[m]=lit[m]||{};lit[m][c]=Math.max(0,(lit[m][c]||0)+(v?1:-1));const el=keys[m];el.classList.remove('L','R','O','S');for(const k of ['O','L','R','S'])if(lit[m][k]>0)el.classList.add(k)}
+function clearKeys(){for(const m in lit){lit[m]={};keys[m]&&keys[m].classList.remove('L','R','O','S')}}
+// ---------- sound: sampled piano (Salamander Grand, see Piano Sound.js) + optional MIDI out ----------
+let ac=null,master=null;const BUF={};let bufKeys=[];
+function AC(){if(!ac){ac=new (window.AudioContext||window.webkitAudioContext)();master=ac.createGain();master.gain.value=.8;master.connect(ac.destination)}if(ac.state==='suspended')ac.resume();return ac}
+const NOTEPC={C:0,'C#':1,D:2,'D#':3,E:4,F:5,'F#':6,G:7,'G#':8,A:9,'A#':10,B:11};
+(function loadSamples(){if(!window.PIANO_SAMPLES){$('loading').textContent='';return}const a=AC();let left=0;$('loading').textContent='loading piano…';
+ for(const nm in PIANO_SAMPLES){const mm=nm.match(/^([A-G]#?)(\d)$/);if(!mm)continue;const midi=12*(+mm[2]+1)+NOTEPC[mm[1]];left++;
+  const bin=atob(PIANO_SAMPLES[nm]);const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);
+  a.decodeAudioData(u.buffer,bf=>{BUF[midi]=bf;bufKeys=Object.keys(BUF).map(Number).sort((x,y)=>x-y);if(--left===0)$('loading').textContent=''},()=>{if(--left===0)$('loading').textContent=''})}})();
+const live=new Set();let VS=1;
+function tone(m,t,d,c,hold){const a=AC();if(live.size>110&&c==='O')return null;
+ const g=a.createGain();g.connect(master);const vel=(c==='O'?.32:(c==='S'?.55:.7))*VS;let src;
+ if(bufKeys.length){let best=bufKeys[0];for(const k of bufKeys)if(Math.abs(k-m)<Math.abs(best-m))best=k;src=a.createBufferSource();src.buffer=BUF[best];src.playbackRate.value=Math.pow(2,(m-best)/12)}
+ else{src=a.createOscillator();src.type='triangle';src.frequency.value=440*Math.pow(2,(m-69)/12)}
+ g.gain.setValueAtTime(vel*(bufKeys.length?1:.15),t);
+ src.connect(g);src.start(t);
+ if(!hold){const end=t+Math.max(.09,d);g.gain.setTargetAtTime(0,end,.09);src.stop(end+.6)}
+const o={src,g};live.add(o);src.onended=()=>live.delete(o);return o}
+function stopAll(){const a=ac;if(!a)return;for(const o of [...live]){if(o.hold)continue;try{o.g.gain.cancelScheduledValues(a.currentTime);o.g.gain.setTargetAtTime(0,a.currentTime,.03);o.src.stop(a.currentTime+.15)}catch(e){}live.delete(o)}}
+// MIDI out (Chrome on Mac): send to Logic / Kontakt through the IAC Driver
+let midiAcc=null,midiOut=null;const CHN={R:0,L:1,O:2,S:0};
+function midiSend(m,t,d,c){if(!midiOut)return;const a=AC();const base=performance.now()+(t-a.currentTime)*1000;const ch=CHN[c]||0;const v=c==='O'?70:90;
+ midiOut.send([0x90|ch,m,v],Math.max(performance.now(),base));if(d!=null)midiOut.send([0x80|ch,m,0],Math.max(performance.now(),base+Math.max(60,d*1000)))}
+function midiPanic(){if(!midiOut)return;try{midiOut.clear&&midiOut.clear()}catch(e){}for(let ch=0;ch<3;ch++){midiOut.send([0xB0|ch,123,0]);midiOut.send([0xB0|ch,64,0])}}
+function sound(m,t,d,c){if(midiOut)midiSend(m,t,d,c);else tone(m,t,d,c)}
+function fillOut(){const sel=$('out');const cur=sel.value;sel.innerHTML='<option value="">Piano</option>';if(midiAcc)for(const o of midiAcc.outputs.values()){const op=document.createElement('option');op.value=o.id;op.textContent='MIDI: '+o.name;sel.appendChild(op)}sel.value=cur}
+if(navigator.requestMIDIAccess){$('out').addEventListener('pointerdown',()=>{if(!midiAcc)navigator.requestMIDIAccess().then(acc=>{midiAcc=acc;fillOut();acc.onstatechange=fillOut}).catch(()=>{})},{once:false})}
+$('out').onchange=()=>{midiPanic();const id=$('out').value;midiOut=id&&midiAcc?midiAcc.outputs.get(id):null;if(held.length)holdSound()};
+function tapKey(m){const a=AC();sound(m,a.currentTime,.6,'R');setKey(m,'R',true);setTimeout(()=>setKey(m,'R',false),500)}
+// ---------- chord / key display ----------
+function chordAt(T){let c=null;for(const x of A.chords){if(x.t<=T+1e-6)c=x;else break}return c}
+let lastCh='',lastKey='';
+function showAt(T,bar){const c=chordAt(T);const nm=c?pretty(c.name):'–';if(nm!==lastCh){lastCh=nm;$('ch').textContent=nm;$('tones').textContent=c?('= '+pretty(c.tones.join(' '))):''}
+ const nt=bar?'Key: '+pretty(KEY[bar.fifths])+' major':'';if(nt!==lastKey){const had=lastKey;lastKey=nt;$('keyName').textContent=nt;if(had){$('keyName').classList.add('flash');setTimeout(()=>$('keyName').classList.remove('flash'),2500)}}}
+// ---------- score (drawn once; only the line moves) ----------
+const score=$('score');let systems=[];
+function hasN(b,k){return (b.parts[k]||[]).some(v=>v.some(e=>e.notes.length))}
+function clefFor(vs){let s=0,n=0;for(const v of vs)for(const e of v)for(const x of e.notes){s+=x.m;n++}return n?(s/n<60?'bass':'treble'):null}
+function vfKey(p,oct){const m=p.match(/^([A-G])(##|bb|#|b|n)?(-?\d)$/);return m[1].toLowerCase()+(m[2]&&m[2]!=='n'?m[2]:'')+'/'+(+m[3]+oct)}
+function mkVoice(ev,clef,oct,multi,up,col){const notes=[];
+ for(const e of ev){const dot='d'.repeat(e.dots);let n;
+  if(!e.notes.length)n=new VF.StaveNote({keys:[clef==='bass'?'d/3':'b/4'],duration:e.vf+dot+'r',clef});
+  else{const sorted=[...e.notes].sort((a,b)=>a.m-b.m);n=new VF.StaveNote({keys:sorted.map(x=>vfKey(x.p,oct)),duration:e.vf+dot,clef,auto_stem:!multi,stem_direction:multi?(up?1:-1):undefined});n.setStyle({fillStyle:col,strokeStyle:col})}
+  for(let i=0;i<e.dots;i++)VF.Dot.buildAndAttach([n],{all:true});notes.push(n);e._n=n}
+ const tuplets=[];for(let i=0;i<ev.length;){const t=ev[i].tup;if(t){const g=notes.slice(i,i+t);if(g.length===t)tuplets.push(new VF.Tuplet(g,{num_notes:ev[i].ta||t,notes_occupied:ev[i].tn||(t===3?2:(t>=9?8:4)),bracketed:false}));i+=t}else i++}
+ const v=new VF.Voice({num_beats:32,beat_value:4}).setMode(VF.Voice.Mode.SOFT);v.addTickables(notes);return {v,notes,tuplets}}
+const SP=120,TOPM=60;
+function weight(b){let n=0;for(const k in b.parts)for(const v of b.parts[k])n=Math.max(n,v.length);return Math.max(n,3)}
+let layoutW=0;
+function layout(){score.innerHTML='';systems=[];const Z=+$('zm').value/100;const W=Math.max(320,(score.clientWidth-16)/Z);layoutW=score.clientWidth;
+ if(!A.bars.length){score.innerHTML='<div class="soon">This movement is coming soon.</div>';return}
+ const PX=46;const lines=[];let cur=[],w=0;for(const b of A.bars){const bw=weight(b)*PX+60;if(cur.length&&w+bw>W-90){lines.push(cur);cur=[];w=0}cur.push(b);w+=bw}if(cur.length)lines.push(cur);
+ let prevKey=null,prevTs=null;const prevClef={};
+ for(const line of lines){const div=document.createElement('div');div.className='sys';const orch=line.some(b=>hasN(b,'c')||hasN(b,'d'));
+  const parts=orch?['a','b','c','d']:['a','b'];const H=TOPM+parts.length*SP+20;div.style.width=W+'px';div.style.height=H+'px';const wr=document.createElement('div');wr.className='sysw';wr.style.width=(W*Z)+'px';wr.style.height=(H*Z)+'px';div.style.transform='scale('+Z+')';div.style.transformOrigin='0 0';wr.appendChild(div);score.appendChild(wr);
+  const r=new VF.Renderer(div,VF.Renderer.Backends.SVG);r.resize(W,H);const ctx=r.getContext();
+  const tot=line.reduce((s,b)=>s+weight(b)*PX+60,0);const lead=86;let x=lead;const scale=(W-lead-12)/tot;
+  const sys={div,items:[],Z,parts,heads:[],W,H};const sysN=systems.length;let hid=0;
+  line.forEach((b,bi)=>{const bw=(weight(b)*PX+60)*scale;const keyName=KEY[b.fifths];
+   if(prevKey!==null&&prevKey!==keyName){const m=document.createElement('div');m.className='keych';m.textContent='Key change → '+pretty(keyName)+' major';m.style.left=x+'px';div.appendChild(m)}
+   const built=[];
+   parts.forEach((k,i)=>{const y=TOPM-30+i*SP;const s=new VF.Stave(x,y,bw);const vs=b.parts[k]||[[]];
+    let cl=clefFor(vs)||prevClef[k]||((i%2)?'bass':'treble');let oct=0,mx=0,mn=200;for(const v of vs)for(const e of v)for(const n of e.notes){mx=Math.max(mx,n.m);mn=Math.min(mn,n.m)}
+    if(cl==='treble'&&mx>=91&&mn>=72){oct=-1;s.setText('8va',VF.Modifier.Position.ABOVE,{shift_y:-10})}
+    if(cl==='bass'&&mn<=33&&mx<=52){oct=1;s.setText('8vb',VF.Modifier.Position.BELOW,{shift_y:6})}
+    if(bi===0||prevClef[k]!==cl)s.addClef(cl);if(bi===0||(prevKey!==null&&prevKey!==keyName))s.addKeySignature(keyName);if(prevTs!==b.ts)s.addTimeSignature(b.ts);
+    prevClef[k]=cl;s.setContext(ctx);built.push({k,s,cl,oct,vs})});
+   const startX=Math.max(...built.map(o=>o.s.getNoteStartX()));built.forEach(o=>{o.s.setNoteStartX(startX);o.s.draw()});
+   const all=[],byS=[];
+   built.forEach(o=>{const vv=[];o.vs.forEach((ev,vi)=>{if(!ev.length)return;const m=mkVoice(ev,o.cl,o.oct,o.vs.length>1,vi===0,CSS[COL[o.k]]);m.ev=ev;vv.push(m);all.push(m.v)});byS.push({o,vv});if(vv.length)try{VF.Accidental.applyAccidentals(vv.map(m=>m.v),keyName)}catch(e){}});
+   const fmt=new VF.Formatter();byS.forEach(q=>{if(q.vv.length)fmt.joinVoices(q.vv.map(m=>m.v))});if(all.length)fmt.format(all,Math.max(40,bw-(startX-x)-14));const hasTup=Object.values(b.parts).some(vs=>vs.some(v=>v.some(e=>e.tup)));if(hasTup&&all.length&&fmt.tickContexts){const tc=fmt.tickContexts;const q=VF.RESOLUTION/4*(tc.resolutionMultiplier||1);const av=Math.max(40,bw-(startX-x)-22);tc.list.forEach(t=>{const c=tc.map[t];if(c)c.setX(av*Math.min(.98,(t/q)/b.L))})}
+   byS.forEach(({o,vv})=>vv.forEach(m=>{const beams=VF.Beam.generateBeams(m.notes,{groups:[b.ts==='2/2'?new VF.Fraction(1,2):new VF.Fraction(1,4)],beam_rests:false,maintain_stem_directions:vv.length>1});
+    m.v.draw(ctx,o.s);beams.forEach(bm=>{bm.setStyle({fillStyle:CSS[COL[o.k]],strokeStyle:CSS[COL[o.k]]});bm.setContext(ctx).draw()});m.tuplets.forEach(t=>t.setContext(ctx).draw());
+    m.ev.forEach(e=>{const x0=e._n.getAbsoluteX();sys.items.push({T:b.T+e.t,x:x0+6});if(e.notes.length){let ys=[];try{ys=e._n.getYs()}catch(_){}const srt=[...e.notes].sort((p,q)=>p.m-q.m);srt.forEach((n,i)=>{if(ys[i]!=null)sys.heads.push({x:x0+6,y:ys[i],m:n.m,p:n.p,c:COL[o.k],id:sysN+'_'+(hid++)})})}})}));
+   const nr=document.createElement('div');nr.className='nr';nr.textContent=b.n;nr.style.left=(x+2)+'px';nr.style.top='16px';div.appendChild(nr);
+   if(b.unclear){const u=document.createElement('div');u.className='unclear';u.textContent='unclear';u.style.left=(x+28)+'px';u.style.top='16px';div.appendChild(u)}
+   if(orch&&b.instr&&b.instr.length){b.instr.forEach(([t,nm],j)=>{const g=document.createElement('div');g.className='ins';g.textContent=nm;g.style.left=(x+8+(t/b.L)*(bw-16))+'px';g.style.top=(TOPM-30+2*SP-22+j*12)+'px';div.appendChild(g)})}
+   prevKey=keyName;prevTs=b.ts;sys.items.push({T:b.T,x:x+4});sys.items.push({T:b.T+b.L,x:x+bw});x+=bw});
+  sys.items.sort((a,b)=>a.T-b.T||a.x-b.x);
+  const lab=(t,yy,c)=>{ctx.save();ctx.setFont('sans-serif',11,'bold');ctx.setFillStyle(c);ctx.fillText(t,6,yy);ctx.restore()};
+  lab('Piano',TOPM+60,'#333');if(orch)lab('Orchestra',TOPM+2*SP+60,CSS.O);
+  // shading for muted parts
+  sys.shade={};parts.forEach((k,i)=>{const sh=document.createElement('div');sh.className='shade';sh.style.top=(TOPM-40+i*SP)+'px';sh.style.height=SP+'px';div.appendChild(sh);sys.shade[k]=sh});
+  const band=document.createElement('div');band.className='band';div.appendChild(band);sys.band=band;const ln=document.createElement('div');ln.className='ln';div.appendChild(ln);sys.ln=ln;sys.T0=line[0].T;const l=line[line.length-1];sys.T1=l.T+l.L;
+  attachPointer(sys);
+  systems.push(sys)}
+ applyShade()}
+function applyShade(){for(const s of systems)for(const k in s.shade)s.shade[k].style.display=on[COL[k]]?'none':'block'}
+function xAt(s,T){const it=s.items;let a=it[0],b=it[it.length-1];for(let i=0;i<it.length;i++){if(it[i].T<=T+1e-6)a=it[i];if(it[i].T>=T-1e-6){b=it[i];break}}return b.T===a.T?a.x:a.x+(b.x-a.x)*(T-a.T)/(b.T-a.T)}
+function Tat(s,x){const it=s.items;let best=it[0];for(const p of it){if(p.x<=x+8)best=p}return Math.max(s.T0,Math.min(best.T,s.T1-1e-3))}
+// ---------- playback: notes are scheduled ahead on the audio clock (no stalls) ----------
+let EV=[],END=0;
+function prep(){let S=0,bpm=100;for(const b of A.bars){if(b.bpm)bpm=b.bpm;b._bpm=bpm;b.S=S;S+=b.L*60/bpm}A.Send=S}
+function barAt(T){const B=A.bars;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(B[m].T<=T+1e-9)lo=m;else hi=m-1}return B[lo]}
+function toSec(T){const b=barAt(T);const q=T-b.T;if(b.w&&q>0){const D=b.L*60/b._bpm;let p0=[0,0];for(const k of b.w){if(q<=k[0])return b.S+D*(p0[1]+(k[1]-p0[1])*(q-p0[0])/Math.max(1e-9,k[0]-p0[0]));p0=k}return b.S+D*(p0[1]+(1-p0[1])*(q-p0[0])/Math.max(1e-9,b.L-p0[0]))}return b.S+q*60/b._bpm}
+function toBeat(S){const B=A.bars;let lo=0,hi=B.length-1;while(lo<hi){const m=(lo+hi+1)>>1;if(B[m].S<=S+1e-9)lo=m;else hi=m-1}const b=B[lo];if(b.w){const D=b.L*60/b._bpm,f=(S-b.S)/D;let p0=[0,0];for(const k of b.w.concat([[b.L,1]])){if(f<=k[1])return b.T+p0[0]+(k[0]-p0[0])*(f-p0[1])/Math.max(1e-9,k[1]-p0[1]);p0=k}return b.T+b.L}return b.T+(S-b.S)*b._bpm/60}
+function timeline(){prep();EV=[];for(const b of A.bars)for(const k in b.parts)for(const v of b.parts[k])for(const e of v){if(!e.notes.length)continue;const T=b.T+e.t;const S=toSec(T);const nn=e.notes.filter(n=>!n.tc);const pl=nn.filter(n=>!n.hd);if(pl.length)EV.push({T,S,dS:toSec(Math.min(T+e.d,b.T+b.L+e.d))-S,ms:pl.map(n=>n.m),c:COL[k]});for(const n of nn)if(n.hd)EV.push({T,S,dS:toSec(T+n.hd)-S,ms:[n.m],c:COL[k]})}
+ EV.sort((a,b)=>a.S-b.S);const l=A.bars[A.bars.length-1];END=l?l.T+l.L:0}
+let playing=false,pos=0,evi=0,raf=0,tick=0,curSys=null,anchorA=0,anchorS=0,sp=1;const vis=[];
+const speed=()=>+$('sp').value/100;
+function nowS(){return Math.max(anchorS,anchorS+(ac.currentTime-anchorA)*sp)}
+function sched(){if(!playing)return;const a=ac;const hz=anchorS+(a.currentTime+.3-anchorA)*sp;
+ while(evi<EV.length&&EV[evi].S<=hz){const e=EV[evi++];if(!on[e.c])continue;const when=Math.max(a.currentTime,anchorA+(e.S-anchorS)/sp);const dur=e.dS/sp;
+  VS=e.c==='O'?Math.min(1,1.6/Math.sqrt(e.ms.length)):1;for(const m of e.ms)sound(m,when,dur,e.c);VS=1;vis.push({on:when,off:when+dur,ms:e.ms,c:e.c,lit:false})}}
+function render(T){const s=systems.find(x=>T>=x.T0-1e-6&&T<x.T1)||systems[systems.length-1];if(!s)return;
+ if(s!==curSys){if(curSys){curSys.ln.style.visibility='hidden';curSys.band.style.visibility='hidden'}s.ln.style.visibility='visible';s.band.style.visibility='visible';curSys=s}
+ if(playing){const r=s.div.getBoundingClientRect();const top=$('top').offsetHeight;if(r.top<top-2||r.bottom>innerHeight+2)window.scrollTo({top:scrollY+r.top-top-10})}
+ s.ln.style.transform='translateX('+xAt(s,T)+'px)';
+ const b=A.bars.find(x=>T>=x.T&&T<x.T+x.L);if(b){const x0=xAt(s,b.T),x1=xAt(s,b.T+b.L-1e-4);s.band.style.transform='translateX('+x0+'px)';s.band.style.width=Math.max(0,x1-x0)+'px'}if(b&&!held.length)showAt(T,b)}
+function frame(){if(!playing)return;const t=ac.currentTime;
+ for(let i=vis.length-1;i>=0;i--){const v=vis[i];if(!v.lit&&v.on<=t){v.lit=true;v.ms.forEach(m=>setKey(m,v.c,true))}if(v.lit&&v.off<=t){v.ms.forEach(m=>setKey(m,v.c,false));vis.splice(i,1)}}
+ pos=toBeat(nowS());render(Math.min(pos,END-.001));if(pos>=END){pause();seek(0);return}raf=requestAnimationFrame(frame)}
+function play(){if(!A.bars.length)return;const a=AC();if(pos>=END-.01)seek(0);playing=true;sp=speed();anchorA=a.currentTime+.06;anchorS=toSec(pos);
+ evi=EV.findIndex(e=>e.S>=anchorS-1e-6);if(evi<0)evi=EV.length;$('play').textContent='⏸ Pause';sched();tick=setInterval(sched,25);raf=requestAnimationFrame(frame)}
+function pause(){if(playing&&ac)pos=toBeat(nowS());playing=false;clearInterval(tick);cancelAnimationFrame(raf);$('play').textContent='▶ Play';stopAll();midiPanic();vis.length=0;clearKeys();relightHeld()}
+function seek(T){pos=T;vis.length=0;clearKeys();relightHeld();render(T)}
+function jump(T){const was=playing;if(was)pause();seek(T);play()}
+
+// ---------- select notes: drag a box or tap notes; the keyboard holds them and they ring together ----------
+let selMode=false;const selected=new Map();let held=[];
+const Qs={'':[0,4,7],'m':[0,3,7],'dim':[0,3,6],'aug':[0,4,8],'7':[0,4,7,10],'maj7':[0,4,7,11],'m7':[0,3,7,10],'m6':[0,3,7,9],'6':[0,4,7,9],'dim7':[0,3,6,9],'m7b5':[0,3,6,10],'sus4':[0,5,7],'7sus4':[0,5,7,10],'mMaj7':[0,3,7,11],'9':[0,4,7,10,2],'maj9':[0,4,7,11,2],'m9':[0,3,7,10,2],'add9':[0,4,7,2]};
+const PCn={C:0,D:2,E:4,F:5,G:7,A:9,B:11};const SH='C C# D D# E F F# G G# A A# B'.split(' ');
+const nmOf=p=>p.replace(/-?\d+$/,'').replace(/n$/,'');
+function pcOf(nm){let v=PCn[nm[0]];for(const ch of nm.slice(1)){if(ch==='#')v++;if(ch==='b')v--}return (v+120)%12}
+function spellPc(pc,names){for(const n of names)if(pcOf(n)===pc)return n;return SH[pc]}
+function nameChord(ms,names){if(!ms.length)return null;const w={};let bass=Math.min(...ms);ms.forEach(m=>w[m%12]=(w[m%12]||0)+1);const mxw=Math.max(...Object.values(w));
+ if(Object.keys(w).length===1)return {name:spellPc(bass%12,names),tones:[spellPc(bass%12,names)]};
+ if(Object.keys(w).length===2){const ps=Object.keys(w).map(Number);return {name:'interval',tones:ps.map(p=>spellPc(p,names))}}
+ let best=null;for(let r=0;r<12;r++)for(const q in Qs){const iv=Qs[q];const tones=new Set(iv.map(i=>(r+i)%12));let ins=0,out=0,miss=0;
+  for(const p in w){if(tones.has(+p))ins+=w[p];else out+=w[p]}for(const t of tones)if(!w[t])miss++;
+  const sc=ins-1.4*out-miss*.9*mxw-.05*iv.length+(r===bass%12?.2:0)+((q===''||q==='m')?.05:0);if(!best||sc>best.sc)best={sc,r,q,iv}}
+ const root=spellPc(best.r,names);let name=root+best.q;if(bass%12!==best.r)name+='/'+spellPc(bass%12,names);
+ const extra=Object.keys(w).map(Number).filter(p=>!best.iv.map(i=>(best.r+i)%12).includes(p)).map(p=>spellPc(p,names));
+ return {name,tones:best.iv.map(i=>spellPc((best.r+i)%12,names)),extra}}
+function relightHeld(){held.forEach(m=>setKey(m,'S',true))}
+function holdSound(){const a=AC();for(const o of [...live])if(o.hold){try{o.g.gain.setTargetAtTime(0,a.currentTime,.05);o.src.stop(a.currentTime+.3)}catch(e){};live.delete(o)}
+ midiPanicHeld();const t=a.currentTime+.02;held.forEach((m,i)=>{if(midiOut){midiSend(m,t+i*.012,null,'S')}else{const o=tone(m,t+i*.012,0,'S',true);if(o){o.hold=true}const os=a.createOscillator(),pg=a.createGain();os.type='sine';os.frequency.value=440*Math.pow(2,(m-69)/12);pg.gain.setValueAtTime(0,t);pg.gain.linearRampToValueAtTime(.05,t+1.2);os.connect(pg).connect(master);os.start(t);const po={src:os,g:pg,hold:true};live.add(po)}})}
+let heldMidi=[];function midiPanicHeld(){if(!midiOut)return;for(const m of heldMidi)midiOut.send([0x80,m,0]);heldMidi=[]}
+const _ms=midiSend;midiSend=function(m,t,d,c){_ms(m,t,d,c);if(d==null)heldMidi.push(m)};
+function stopHold(){const a=ac;if(a)for(const o of [...live])if(o.hold){try{o.g.gain.setTargetAtTime(0,a.currentTime,.06);o.src.stop(a.currentTime+.4)}catch(e){};live.delete(o)}midiPanicHeld()}
+function drawMarks(){document.querySelectorAll('.sm').forEach(e=>e.remove());for(const [id,h] of selected){const s=systems[+id.split('_')[0]];if(!s)continue;const d=document.createElement('div');d.className='sm';d.style.left=h.x+'px';d.style.top=h.y+'px';s.div.appendChild(d)}}
+function updateSel(sound=true){held.forEach(m=>setKey(m,'S',false));const ms=[...new Set([...selected.values()].map(h=>h.m))].sort((a,b)=>a-b);held=ms;relightHeld();drawMarks();
+ const box=$('selinfo');if(!ms.length){box.classList.remove('on');stopHold();lastCh='';return}box.classList.add('on');
+ const names=[];for(const h of selected.values()){const n=nmOf(h.p);if(!names.includes(n))names.push(n)}
+ const lowP=[...selected.values()].reduce((a,b)=>a.m<=b.m?a:b),hiP=[...selected.values()].reduce((a,b)=>a.m>=b.m?a:b);
+ const ch=nameChord(ms,names);$('sch').textContent=ch?(ch.name==='interval'?'Interval '+pretty(ch.tones.join(' – ')):pretty(ch.name)):'–';
+ $('sbt').innerHTML='Bass <em>'+pretty(nmOf(lowP.p))+'</em> · Top <em>'+pretty(nmOf(hiP.p))+'</em>';
+ const lowToHigh=[];const seen=new Set();[...selected.values()].sort((a,b)=>a.m-b.m).forEach(h=>{const k=h.m;if(!seen.has(k)){seen.add(k);lowToHigh.push(pretty(nmOf(h.p)))}});
+ $('snotes').textContent=ms.length+' notes (low → high): '+lowToHigh.join(' ')+(ch&&ch.extra&&ch.extra.length?'  ·  extra notes: '+pretty(ch.extra.join(' ')):'');
+ if(sound)holdSound()}
+function clearSel(){selected.clear();updateSel()}
+function headsIn(s,x0,y0,x1,y1){return s.heads.filter(h=>h.x>=x0-6&&h.x<=x1+6&&h.y>=y0-5&&h.y<=y1+5&&on[h.c])}
+function attachPointer(sys){const div=sys.div;let st=null,box=null,dragging=false,live2=new Map();
+ const liveSet=(x0,y0,x1,y1,ev)=>{const ms=new Set(headsIn(sys,x0,y0,x1,y1).map(h=>h.m));const a=AC();
+  for(const [m,o] of [...live2])if(!ms.has(m)){if(o){try{o.g.gain.setTargetAtTime(0,a.currentTime,.05);o.src.stop(a.currentTime+.3)}catch(e){};live.delete(o)}if(midiOut)midiOut.send([0x80,m,0]);setKey(m,'S',false);live2.delete(m)}
+  for(const m of ms)if(!live2.has(m)&&!held.includes(m)){let o=null;if(midiOut){midiSend(m,a.currentTime,null,'S')}else{o=tone(m,a.currentTime,0,'S',true);if(o)o.hold=true}setKey(m,'S',true);live2.set(m,o)}};
+ const pt=ev=>{const rc=div.getBoundingClientRect();return [(ev.clientX-rc.left)/(rc.width/sys.W),(ev.clientY-rc.top)/(rc.height/sys.H)]};
+ div.addEventListener('pointerdown',ev=>{ev.preventDefault();const [x,y]=pt(ev);
+  if(!selMode){jump(Tat(sys,x));return}
+  st=[x,y];div.setPointerCapture(ev.pointerId);box=document.createElement('div');box.className='selbox';div.appendChild(box)});
+ div.addEventListener('pointermove',ev=>{if(!st||!box)return;const [x,y]=pt(ev);if(!dragging&&(Math.abs(x-st[0])>=6||Math.abs(y-st[1])>=6)){dragging=true;live2.clear();if(!ev.shiftKey){selected.clear();held.forEach(m=>setKey(m,'S',false));held=[];stopHold();drawMarks()}}if(dragging)liveSet(Math.min(x,st[0]),Math.min(y,st[1]),Math.max(x,st[0]),Math.max(y,st[1]),ev);box.style.left=Math.min(x,st[0])+'px';box.style.top=Math.min(y,st[1])+'px';box.style.width=Math.abs(x-st[0])+'px';box.style.height=Math.abs(y-st[1])+'px'});
+ const up=ev=>{if(!st)return;const [x,y]=pt(ev);box&&box.remove();box=null;const s0=st;st=null;const wasDrag=dragging;dragging=false;
+  if(Math.abs(x-s0[0])<6&&Math.abs(y-s0[1])<6){let best=null,bd=1e9;for(const h of sys.heads){if(!on[h.c])continue;const d=Math.hypot(h.x-x,h.y-y);if(d<bd){bd=d;best=h}}
+   if(best&&bd<14){if(selected.has(best.id))selected.delete(best.id);else selected.set(best.id,best);updateSel()}return}
+  if(!ev.shiftKey&&!wasDrag)selected.clear();headsIn(sys,Math.min(x,s0[0]),Math.min(y,s0[1]),Math.max(x,s0[0]),Math.max(y,s0[1])).forEach(h=>selected.set(h.id,h));live2.clear();updateSel(!wasDrag)};
+ div.addEventListener('pointerup',up);div.addEventListener('pointercancel',()=>{st=null;dragging=false;box&&box.remove();box=null;stopHold();live2.forEach((o,m)=>setKey(m,'S',false));live2.clear()})}
+$('selbtn').onclick=()=>{selMode=!selMode;document.body.classList.toggle('sel',selMode);$('selbtn').classList.toggle('selon',selMode);$('selbtn').textContent=selMode?'✋ Selecting – tap to stop':'✋ Select notes';if(selMode&&playing)pause()};
+$('sclr').onclick=clearSel;$('shear').onclick=()=>holdSound();
+addEventListener('keydown',e=>{if(e.key==='Escape')clearSel();if(e.key===' '&&e.target===document.body){e.preventDefault();playing?pause():play()}});
+// ---------- controls ----------
+$('play').onclick=()=>playing?pause():play();$('home').onclick=()=>{pause();seek(0);window.scrollTo({top:0})};
+$('sp').oninput=()=>{$('spv').textContent=$('sp').value+'%';if(playing){anchorS=nowS();anchorA=ac.currentTime;sp=speed()}};
+try{const z=localStorage.getItem('zm');if(z)$('zm').value=z}catch(e){}
+$('zmv').textContent=$('zm').value+'%';let zt;$('zm').oninput=()=>{$('zmv').textContent=$('zm').value+'%';try{localStorage.setItem('zm',$('zm').value)}catch(e){}clearTimeout(zt);zt=setTimeout(()=>{selected.clear();updateSel(false);curSys=null;layout();render(pos)},150)};
+function buildParts(){const box=$('parts');box.innerHTML='';const has={R:false,L:false,O:false};for(const b of A.bars){if(hasN(b,'a'))has.R=true;if(hasN(b,'b'))has.L=true;if(hasN(b,'c')||hasN(b,'d'))has.O=true}
+ for(const c of ['O','R','L']){if(!has[c]&&!(c!=='O'))continue;if(c==='O'&&!has.O)continue;const bt=document.createElement('button');bt.className='tog'+(on[c]?'':' off');bt.innerHTML='<i style="background:'+CSS[c]+'"></i>'+NAME[c];
+  bt.onclick=()=>{on[c]=!on[c];bt.classList.toggle('off',!on[c]);applyShade();for(let i=vis.length-1;i>=0;i--)if(vis[i].c===c){if(vis[i].lit)vis[i].ms.forEach(m=>setKey(m,c,false));vis.splice(i,1)}};box.appendChild(bt)}}
+function loadMv(i){pause();selected.clear();held=[];$('selinfo')&&$('selinfo').classList.remove('on');mvI=i;A=DATA.movements[i];[...$('tabs').children].forEach((b,j)=>b.classList.toggle('on',j===i));range();buildKb();timeline();buildParts();curSys=null;lastKey='';lastCh='';layout();seek(0);window.scrollTo({top:0})}
+DATA.movements.forEach((m,i)=>{const b=document.createElement('button');b.textContent=m.name;b.onclick=()=>loadMv(i);$('tabs').appendChild(b)});
+if(DATA.movements.length<2)$('tabs').style.display='none';
+loadMv(0);
+// only redraw when the WIDTH really changes (iPad address bar resizes height while scrolling - that caused the blinking)
+let rz;addEventListener('resize',()=>{clearTimeout(rz);rz=setTimeout(()=>{if(Math.abs(score.clientWidth-layoutW)>4){buildKb();curSys=null;layout();render(pos)}},250)});
+</script></body></html>
